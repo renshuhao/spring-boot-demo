@@ -3,20 +3,27 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>com.wealthlake</groupId>
-	<artifactId>sb-demo</artifactId>
-	<version>1.0.0</version>
-	<packaging>jar</packaging>
-
-	<name>sb-demo</name>
-	<description>Demo project for Spring Boot</description>
-
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
 		<version>2.0.4.RELEASE</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
+
+	<groupId>com.wealthlake</groupId>
+	<artifactId>sb-demo</artifactId>
+	<version>1.0.0</version>
+	<packaging>pom</packaging>
+
+	<name>sb-demo</name>
+	<description>Demo project for Spring Boot</description>
+
+	<modules>
+		<module>sb-demo-common</module>
+		<module>sb-demo-core</module>
+		<module>sb-demo-dataaccess</module>
+		<module>sb-demo-web</module>
+	</modules>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -25,26 +32,19 @@
 	</properties>
 
 	<dependencies>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter</artifactId>
-		</dependency>
 
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-test</artifactId>
-			<scope>test</scope>
-		</dependency>
 	</dependencies>
 
 	<build>
 		<plugins>
 			<plugin>
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-maven-plugin</artifactId>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<configuration>
+					<skipTests>true</skipTests>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>
-
 
 </project>

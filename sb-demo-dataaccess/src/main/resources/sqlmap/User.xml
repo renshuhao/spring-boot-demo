@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+
+<mapper namespace="com.wealthlake.sb_demo.dataaccess.dao.mysql.UserMysqlDAO">
+
+	<resultMap id="RmUser" type="com.wealthlake.sb_demo.dataaccess.domain.UserDO">
+        <result property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="phone" column="phone"/>
+        <result property="sex" column="sex"/>
+        <result property="birthday" column="birthday"/>
+        <result property="createTime" column="create_time"/>
+        <result property="password" column="password"/>
+        <result property="passwordType" column="password_type"/>
+        <result property="passwordSalt" column="password_salt"/>
+        <result property="lastLoginTime" column="last_login_time"/>
+        <result property="lastLoginIp" column="last_login_ip"/>
+				<!-- many-to-one -->
+	</resultMap>
+	
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="userColumns">
+	    <![CDATA[
+		id,name,phone,sex,birthday,create_time,password,password_type,password_salt,last_login_time,last_login_ip
+	    ]]>
+	</sql>
+
+	<insert id="save" useGeneratedKeys="true" keyColumn="id" keyProperty="id">
+    <![CDATA[
+        INSERT INTO user (
+        	id ,
+        	name ,
+        	phone ,
+        	sex ,
+        	birthday ,
+        	create_time ,
+        	password ,
+        	password_type ,
+        	password_salt ,
+        	last_login_time ,
+        	last_login_ip 
+        ) VALUES (
+        	#{id} ,
+        	#{name} ,
+        	#{phone} ,
+        	#{sex} ,
+        	#{birthday} ,
+        	#{createTime} ,
+        	#{password} ,
+        	#{passwordType} ,
+        	#{passwordSalt} ,
+        	#{lastLoginTime} ,
+        	#{lastLoginIp} 
+        )
+    ]]>
+	</insert>
+    
+	<update id="update" >
+    <![CDATA[
+        UPDATE user SET
+	        name = #{name} ,
+	        phone = #{phone} ,
+	        sex = #{sex} ,
+	        birthday = #{birthday} ,
+	        create_time = #{createTime} ,
+	        password = #{password} ,
+	        password_type = #{passwordType} ,
+	        password_salt = #{passwordSalt} ,
+	        last_login_time = #{lastLoginTime} ,
+	        last_login_ip = #{lastLoginIp} 
+        WHERE 
+	        id = #{id} 
+    ]]>
+	</update>
+
+    <delete id="delete">
+    <![CDATA[
+        DELETE FROM user WHERE
+        id = #{id} 
+    ]]>
+    </delete>
+    
+    <select id="findById" resultMap="RmUser">
+		SELECT <include refid="userColumns" />
+	    <![CDATA[
+		    FROM user 
+	        WHERE 
+		        id = #{id} 
+	    ]]>
+	</select>
+	
+	<!-- 过滤规则sql -->
+	<sql id="userFilterRule">
+		<where>
+			1=1
+	       	<foreach collection="filterRules" item="item" index="index" open="" close="" separator=" ">
+   				<if test="item.key == 'id'">
+					AND id = #{item.value}
+				</if>
+   				<if test="item.key == 'name'">
+					AND name = #{item.value}
+				</if>
+   				<if test="item.key == 'phone'">
+					AND phone = #{item.value}
+				</if>
+   				<if test="item.key == 'sex'">
+					AND sex = #{item.value}
+				</if>
+				<if test="item.key == 'birthday_begin'">
+					AND birthday >= #{item.value}
+				</if>
+				<if test="item.key == 'birthday_end'">
+					AND birthday &lt;= #{item.value}
+				</if>
+				<if test="item.key == 'create_time_begin'">
+					AND create_time >= #{item.value}
+				</if>
+				<if test="item.key == 'create_time_end'">
+					AND create_time &lt;= #{item.value}
+				</if>
+   				<if test="item.key == 'password'">
+					AND password = #{item.value}
+				</if>
+   				<if test="item.key == 'password_type'">
+					AND password_type = #{item.value}
+				</if>
+   				<if test="item.key == 'password_salt'">
+					AND password_salt = #{item.value}
+				</if>
+				<if test="item.key == 'last_login_time_begin'">
+					AND last_login_time >= #{item.value}
+				</if>
+				<if test="item.key == 'last_login_time_end'">
+					AND last_login_time &lt;= #{item.value}
+				</if>
+   				<if test="item.key == 'last_login_ip'">
+					AND last_login_ip = #{item.value}
+				</if>
+		   </foreach>
+		</where>
+	</sql>
+	
+	<select id="findAll" resultMap="RmUser">
+    	SELECT <include refid="userColumns" />
+	    FROM user 
+		<include refid="userFilterRule"/>
+    </select>
+	
+	<delete id="deleteAll">
+    	DELETE
+	    FROM user 
+		<include refid="userFilterRule"/>
+    </delete>
+    
+    <select id="findByPage" resultMap="RmUser">
+    	SELECT <include refid="userColumns" />
+	    FROM user 
+		<include refid="userFilterRule"/>
+		
+		<if test="pageQuery.orderBy != null">
+			ORDER BY ${pageQuery.orderBy} ${pageQuery.orderType}
+		</if>
+		LIMIT ${pageQuery.start}, ${pageQuery.pageSize}
+    </select>
+
+    <select id="getTotalCount" resultType="int">
+        SELECT count(id) 
+        FROM user 
+		<include refid="userFilterRule"/>
+    </select>
+    
+    
+</mapper>
+
