@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>com.wealthlake</groupId>
+		<artifactId>sb-demo</artifactId>
+		<version>1.0.0</version>
+	</parent>
+
+	<artifactId>sb-demo-web</artifactId>
+	<version>1.0.0</version>
+	<packaging>jar</packaging>
+
+	<name>sb-demo-web</name>
+	<description>Demo project for Spring Boot</description>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+		<java.version>1.8</java.version>
+
+		<docker.image.prefix>springboot</docker.image.prefix>
+
+		<!-- maven资源过滤占位符就被spring boot的maven pom替换掉了，变成了@xx@，通过设置resource.delimiter覆盖到spring boot的占位符 -->
+		<resource.delimiter>${}</resource.delimiter>
+	</properties>
+
+	<dependencies>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>com.wealthlake</groupId>
+			<artifactId>sb-demo-core</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.fasterxml.jackson.dataformat</groupId>
+			<artifactId>jackson-dataformat-xml</artifactId>
+		</dependency>
+
+		<!-- jsp集成，需要把打包方式改为：war，在执行springboot:run -->
+		<!-- tomcat 的支持.-->
+		<dependency>
+			<groupId>org.apache.tomcat.embed</groupId>
+			<artifactId>tomcat-embed-jasper</artifactId>
+			<scope>provided</scope>
+		</dependency>
+
+		<!-- jstl标签库 -->
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>jstl</artifactId>
+		</dependency>
+
+	</dependencies>
+
+	<profiles>
+		<profile>
+			<id>dev</id>
+			<properties>
+				<profileActive>dev</profileActive>
+			</properties>
+			<activation>
+				<!--默认激活-->
+				<activeByDefault>true</activeByDefault>
+			</activation>
+		</profile>
+		<profile>
+			<id>test</id>
+			<properties>
+				<profileActive>test</profileActive>
+			</properties>
+		</profile>
+		<profile>
+			<id>prod</id>
+			<properties>
+				<profileActive>prod</profileActive>
+			</properties>
+		</profile>
+	</profiles>
+
+	<build>
+		<filters>
+			<filter>src/main/resources/application-${profileActive}.properties</filter>
+		</filters>
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>true</filtering>
+			</resource>
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>true</filtering>
+				<includes>
+					<include>application.properties</include>
+					<include>application-${profileActive}.properties</include>
+					<include>*.xml</include>
+				</includes>
+			</resource>
+			<!-- 过滤Dockerfile占位符,输出到target/docker目录下 -->
+			<resource>
+				<directory>src/main/docker</directory>
+				<filtering>true</filtering>
+				<includes>
+					<include>**/Dockerfile</include>
+				</includes>
+				<targetPath>../docker</targetPath>
+			</resource>
+		</resources>
+
+		<plugins>
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+				<configuration>
+					<!-- 没有该配置，devtools 不生效 -->
+					<fork>true</fork>
+				</configuration>
+			</plugin>
+
+			<!-- Docker maven plugin -->
+			<!-- 在项目目录中执行命令：mvn clean  package docker:build  构建docker镜像 -->
+			<!-- docker run -p 8180:8180 -t 镜像名称  运行镜像 -->
+			<plugin>
+				<groupId>com.spotify</groupId>
+				<artifactId>docker-maven-plugin</artifactId>
+				<version>1.1.0</version>
+				<configuration>
+					<!-- 镜像名称 -->
+					<imageName>${docker.image.prefix}/${project.artifactId}</imageName>
+					<!-- Dockerfile 所在目录，会将dockerDirectory的内容拷贝值${project.build.directory}/docker,
+						使用resouces元素可以拷贝其他的文件，比如生成jar包文件 -->
+					<dockerDirectory>target/docker</dockerDirectory>
+					<resources>
+						<resource>
+							<targetPath>/</targetPath>
+							<directory>${project.build.directory}</directory>
+							<include>${project.build.finalName}.jar</include>
+						</resource>
+					</resources>
+				</configuration>
+			</plugin>
+			<!-- Docker maven plugin -->
+
+		</plugins>
+	</build>
+
+
+</project>
