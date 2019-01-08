@@ -46,8 +46,8 @@
 			<artifactId>jackson-dataformat-xml</artifactId>
 		</dependency>
 
-		<!-- jsp集成，需要把打包方式改为：war，在执行springboot:run -->
-		<!-- tomcat 的支持.-->
+		<!-- jsp集成，需要把打包方式改为：war，在执行springboot:run，或idea tomcat启动，或者打war执行 -->
+		<!-- tomcat 的支持. 用于编译jsp -->
 		<dependency>
 			<groupId>org.apache.tomcat.embed</groupId>
 			<artifactId>tomcat-embed-jasper</artifactId>
